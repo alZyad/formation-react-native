@@ -10,8 +10,10 @@
 
 import React from 'react';
 import {
+  Image,
   SafeAreaView,
   ScrollView,
+  ScrollViewBase,
   StatusBar,
   StyleSheet,
   Text,
@@ -19,48 +21,21 @@ import {
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
+const Title = () => {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.titleContainer}>
+      <Text style={styles.titleText}>Champions List</Text>
     </View>
   );
 };
 
-const MyFirstComponent = () => {
-  const helloWorld = 'Hello world.';
-
+const Champion = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.helloWorld}>{helloWorld}</Text>
+    <View style={styles.championContainer}>
+      <Text style={styles.championName}>Aatrox</Text>
+      <Image source={require('./static/images/Aatrox.png')} />
     </View>
   );
 };
@@ -73,20 +48,28 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <MyFirstComponent />
+    <SafeAreaView style={{...backgroundStyle, ...styles.mainScrollView}}>
+      <ScrollView
+        style={styles.mainScrollView}
+        contentInsetAdjustmentBehavior="automatic">
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <Title />
+        <Champion />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  mainScrollView: {
+    flex: 1,
+  },
+  titleContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
-  helloWorld: {
+  titleText: {
     width: '80%',
     marginVertical: 16,
     paddingVertical: 6,
@@ -100,6 +83,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     overflow: 'hidden',
+  },
+  championContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  championName: {
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
 

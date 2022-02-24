@@ -55,6 +55,16 @@ const Section: React.FC<{
   );
 };
 
+const MyFirstComponent = () => {
+  const helloWorld = 'Hello world.';
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.helloWorld}>{helloWorld}</Text>
+    </View>
+  );
+};
+
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -62,55 +72,34 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const helloWorld: string = 'Hello world.';
-
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits: {helloWorld}
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <MyFirstComponent />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
+  helloWorld: {
+    width: '80%',
+    marginVertical: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderColor: 'black',
+    borderRadius: 10,
+    borderWidth: 3,
+    color: 'black',
+    backgroundColor: '#61dafb',
     fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    overflow: 'hidden',
   },
 });
 

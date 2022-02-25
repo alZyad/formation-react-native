@@ -8,20 +8,21 @@
  * @format
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
   ScrollView,
-  ScrollViewBase,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   useColorScheme,
   View,
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import Images from './static/images/index';
 
 const Title = () => {
   return (
@@ -31,11 +32,32 @@ const Title = () => {
   );
 };
 
-const Champion = () => {
+type championNames =
+  | 'Aatrox'
+  | 'Ashe'
+  | 'Ahri'
+  | 'Asol'
+  | 'Ryze'
+  | 'Viego'
+  | 'Zeri';
+
+const champions: championNames[] = [
+  'Aatrox',
+  'Ashe',
+  'Ahri',
+  'Asol',
+  'Ryze',
+  'Viego',
+  'Zeri',
+];
+const Champion: React.FC<{
+  name: championNames;
+}> = Props => {
+  const {name} = Props;
   return (
     <View style={styles.championContainer}>
-      <Text style={styles.championName}>Aatrox</Text>
-      <Image source={require('./static/images/Aatrox.png')} />
+      <Text style={styles.championName}>{name}</Text>
+      <Image source={Images[name]} />
     </View>
   );
 };
@@ -47,6 +69,10 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const [search, setSearch] = useState('');
+  const filteredChampions = champions.filter((champion: championNames) =>
+    champion.includes(search),
+  );
   return (
     <SafeAreaView style={{...backgroundStyle, ...styles.mainScrollView}}>
       <ScrollView
@@ -54,7 +80,17 @@ const App = () => {
         contentInsetAdjustmentBehavior="automatic">
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <Title />
-        <Champion />
+        <TextInput
+          style={styles.searchInput}
+          onChangeText={setSearch}
+          value={search}
+          placeholder="Search..."
+        />
+        <View style={styles.championsContainer}>
+          {filteredChampions.map(champion => (
+            <Champion key={champion} name={champion} />
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -84,9 +120,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     overflow: 'hidden',
   },
+  searchInput: {
+    width: '40%',
+    height: 40,
+    marginVertical: 16,
+    marginHorizontal: 32,
+    borderWidth: 1,
+    padding: 10,
+  },
+  championsContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+  },
   championContainer: {
     display: 'flex',
     alignItems: 'center',
+    margin: 10,
   },
   championName: {
     textAlign: 'center',

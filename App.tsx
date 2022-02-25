@@ -8,9 +8,8 @@
  * @format
  */
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -22,7 +21,7 @@ import {
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import Images from './static/images/index';
+import Champion from './components/champion';
 
 const Title = () => {
   return (
@@ -32,46 +31,54 @@ const Title = () => {
   );
 };
 
-type championNames =
-  | 'Aatrox'
-  | 'Ashe'
-  | 'Ahri'
-  | 'Asol'
-  | 'Ryze'
-  | 'Viego'
-  | 'Zeri';
-
-const champions: championNames[] = [
-  'Aatrox',
-  'Ashe',
-  'Ahri',
-  'Asol',
-  'Ryze',
-  'Viego',
-  'Zeri',
-];
-const Champion: React.FC<{
-  name: championNames;
-}> = Props => {
-  const {name} = Props;
-  return (
-    <View style={styles.championContainer}>
-      <Text style={styles.championName}>{name}</Text>
-      <Image source={Images[name]} />
-    </View>
-  );
-};
-
 const App = () => {
+  const [search, setSearch] = useState('');
+  const [champions, setChampions] = useState<
+    {name: string; imageName: string}[]
+  >([]);
+
+  const getChampions = async () => {
+    try {
+      const response = await fetch(
+        'https://ddragon.leagueoflegends.com/cdn/12.4.1/data/en_US/champion.json',
+      );
+      const json = await response.json();
+      const championDetails = Object.entries(json.data);
+
+      const entryHasNameAndImageName = (
+        championEntry: any,
+      ): championEntry is {name: string; image: {full: string}} =>
+        championEntry.hasOwnProperty('name') &&
+        championEntry.hasOwnProperty('image');
+
+      setChampions(
+        championDetails.map(championEntry =>
+          entryHasNameAndImageName(championEntry[1])
+            ? {
+                name: championEntry[1].name,
+                imageName: championEntry[1].image.full,
+              }
+            : {name: 'name_not_found', imageName: 'image_name_not_found'},
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getChampions();
+  }, []);
+
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const [search, setSearch] = useState('');
-  const filteredChampions = champions.filter((champion: championNames) =>
-    champion.includes(search),
+  const filteredChampions = champions.filter(
+    (champion: {name: string; imageName: string}) =>
+      champion.name.toLowerCase().includes(search.toLowerCase()),
   );
   return (
     <SafeAreaView style={{...backgroundStyle, ...styles.mainScrollView}}>
@@ -87,8 +94,12 @@ const App = () => {
           placeholder="Search..."
         />
         <View style={styles.championsContainer}>
-          {filteredChampions.map(champion => (
-            <Champion key={champion} name={champion} />
+          {filteredChampions.map((champion, index) => (
+            <Champion
+              key={champion.name + index}
+              name={champion.name}
+              imageName={champion.imageName}
+            />
           ))}
         </View>
       </ScrollView>
@@ -133,15 +144,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-  },
-  championContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    margin: 10,
-  },
-  championName: {
-    textAlign: 'center',
-    fontSize: 16,
   },
 });
 

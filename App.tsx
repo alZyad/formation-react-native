@@ -31,11 +31,16 @@ const Title = () => {
   );
 };
 
+type championDetails = {name: string; imageName: string};
+
+const isChampion = (
+  championEntry: any,
+): championEntry is {name: string; image: {full: string}} =>
+  championEntry.hasOwnProperty('name') && championEntry.hasOwnProperty('image');
+
 const App = () => {
   const [search, setSearch] = useState('');
-  const [champions, setChampions] = useState<
-    {name: string; imageName: string}[]
-  >([]);
+  const [champions, setChampions] = useState<championDetails[]>([]);
 
   const getChampions = async () => {
     try {
@@ -45,15 +50,9 @@ const App = () => {
       const json = await response.json();
       const championDetails = Object.entries(json.data);
 
-      const entryHasNameAndImageName = (
-        championEntry: any,
-      ): championEntry is {name: string; image: {full: string}} =>
-        championEntry.hasOwnProperty('name') &&
-        championEntry.hasOwnProperty('image');
-
       setChampions(
         championDetails.map(championEntry =>
-          entryHasNameAndImageName(championEntry[1])
+          isChampion(championEntry[1])
             ? {
                 name: championEntry[1].name,
                 imageName: championEntry[1].image.full,
@@ -76,9 +75,8 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const filteredChampions = champions.filter(
-    (champion: {name: string; imageName: string}) =>
-      champion.name.toLowerCase().includes(search.toLowerCase()),
+  const filteredChampions = champions.filter((champion: championDetails) =>
+    champion.name.toLowerCase().includes(search.toLowerCase()),
   );
   return (
     <SafeAreaView style={{...backgroundStyle, ...styles.mainScrollView}}>

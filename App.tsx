@@ -8,87 +8,97 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   useColorScheme,
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import Champion from './components/champion';
 
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
+const Title = () => {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.titleContainer}>
+      <Text style={styles.titleText}>Champions List</Text>
     </View>
   );
 };
 
+type championDetails = {name: string; imageName: string};
+
+const isChampion = (
+  championEntry: any,
+): championEntry is {name: string; image: {full: string}} =>
+  championEntry.hasOwnProperty('name') && championEntry.hasOwnProperty('image');
+
 const App = () => {
+  const [search, setSearch] = useState('');
+  const [champions, setChampions] = useState<championDetails[]>([]);
+
+  const getChampions = async () => {
+    try {
+      const response = await fetch(
+        'https://ddragon.leagueoflegends.com/cdn/12.4.1/data/en_US/champion.json',
+      );
+      const json = await response.json();
+      const championDetails = Object.entries(json.data);
+
+      setChampions(
+        championDetails.map(championEntry =>
+          isChampion(championEntry[1])
+            ? {
+                name: championEntry[1].name,
+                imageName: championEntry[1].image.full,
+              }
+            : {name: 'name_not_found', imageName: 'image_name_not_found'},
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getChampions();
+  }, []);
+
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const helloWorld: string = 'Hello world.';
-
+  const filteredChampions = champions.filter((champion: championDetails) =>
+    champion.name.toLowerCase().includes(search.toLowerCase()),
+  );
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={{...backgroundStyle, ...styles.mainScrollView}}>
       <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits: {helloWorld}
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+        style={styles.mainScrollView}
+        contentInsetAdjustmentBehavior="automatic">
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <Title />
+        <TextInput
+          style={styles.searchInput}
+          onChangeText={setSearch}
+          value={search}
+          placeholder="Search..."
+        />
+        <View style={styles.championsContainer}>
+          {filteredChampions.map((champion, index) => (
+            <Champion
+              key={champion.name + index}
+              name={champion.name}
+              imageName={champion.imageName}
+            />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -96,21 +106,42 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  mainScrollView: {
+    flex: 1,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  titleContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
-  sectionDescription: {
-    marginTop: 8,
+  titleText: {
+    width: '80%',
+    marginVertical: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderColor: 'black',
+    borderRadius: 10,
+    borderWidth: 3,
+    color: 'black',
+    backgroundColor: '#61dafb',
     fontSize: 18,
-    fontWeight: '400',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    overflow: 'hidden',
   },
-  highlight: {
-    fontWeight: '700',
+  searchInput: {
+    width: '40%',
+    height: 40,
+    marginVertical: 16,
+    marginHorizontal: 32,
+    borderWidth: 1,
+    padding: 10,
+  },
+  championsContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
   },
 });
 
